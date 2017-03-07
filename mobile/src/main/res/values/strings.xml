@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Deuce</string>
+    <string name="path_update_score">/deuce/update_score</string>
+</resources>
