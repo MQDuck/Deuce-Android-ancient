@@ -19,8 +19,21 @@
 
 package net.mqduck.deuce.common;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import net.mqduck.deuce.common.R;
 
 /**
  * Created by mqduck on 3/2/17.
@@ -28,27 +41,68 @@ import java.util.Arrays;
 
 public class DeuceModel
 {
-    private int scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4;
+    public static final String KEY_SCORES = "player_scores";
 
-    public DeuceModel(final int scorePlayer1, final int scorePlayer2, final int scorePlayer3,
-                      final int scorePlayer4)
+    private int scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4;
+    private Context context = null;
+    private GoogleApiClient apiClient = null;
+
+    public DeuceModel(final Context context, final int scorePlayer1, final int scorePlayer2,
+                      final int scorePlayer3, final int scorePlayer4)
+    {
+        init(context, scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4);
+    }
+
+    public DeuceModel(final Context context, final int scorePlayer1, final int scorePlayer2)
+    {
+        init(context, scorePlayer1, scorePlayer2, 0, 0);
+    }
+
+    public DeuceModel(final Context context)
+    {
+        init(context, 0, 0, 0, 0);
+    }
+
+    private void init(final Context context, final int scorePlayer1, final int scorePlayer2,
+                      final int scorePlayer3, final int scorePlayer4)
     {
         this.scorePlayer1 = scorePlayer1;
         this.scorePlayer2 = scorePlayer2;
         this.scorePlayer3 = scorePlayer3;
         this.scorePlayer4 = scorePlayer4;
+        this.context = context;
+
+        apiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .build();
+        apiClient.connect();
     }
 
-    public DeuceModel(final int scorePlayer1, final int scorePlayer2)
+    public void updateState()
     {
-        this.scorePlayer1 = scorePlayer1;
-        this.scorePlayer2 = scorePlayer2;
-        scorePlayer3 = scorePlayer4 = 0;
-    }
-
-    public DeuceModel()
-    {
-        scorePlayer1 = scorePlayer2 = scorePlayer3 = scorePlayer4 = 0;
+        Log.d("Deuce", "entering updateState()");
+        if(apiClient.isConnected())
+        {
+            Log.d("Deuce", "apiClient.isConnected() is true");
+            PutDataMapRequest requestMap =
+                    PutDataMapRequest.create("/deuce/update_score");
+            requestMap.getDataMap().putIntegerArrayList(KEY_SCORES, toIntegerArrayList());
+            PutDataRequest request = requestMap.asPutDataRequest();
+            Wearable.DataApi.putDataItem(apiClient, request)
+                    .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override public void onResult(@NonNull DataApi.DataItemResult dataItemResult)
+                        {
+                            if (!dataItemResult.getStatus().isSuccess())
+                            {
+                                Log.d("Deuce", "data sync failed");
+                            }
+                            else
+                            {
+                                Log.d("Deuce", "data sync succeeded");
+                            }
+                        }
+                    });
+        }
     }
 
     public int[] toIntArray()

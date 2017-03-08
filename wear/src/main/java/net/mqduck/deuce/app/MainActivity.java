@@ -53,8 +53,6 @@ public class MainActivity extends WearableActivity
 
     private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
             new SimpleDateFormat("HH:mm", Locale.US);
-    private static final String KEY_SCORES = "player_scores";
-    private static final String WEARABLE_PATH = "/score";
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -62,7 +60,6 @@ public class MainActivity extends WearableActivity
 
     private BroadcastReceiver dataUpdateReceiver = null;
     private DeuceModel model = null;
-    private GoogleApiClient apiClient = null;
     private Button buttonPlayer1, buttonPlayer2;
 
     @Override
@@ -72,11 +69,6 @@ public class MainActivity extends WearableActivity
         setContentView(R.layout.activity_main);
         setAmbientEnabled();
 
-        apiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .build();
-        apiClient.connect();
-
         mContainerView = (BoxInsetLayout)findViewById(R.id.container);
         mTextView = (TextView)findViewById(R.id.text);
         //mClockView = (TextView)findViewById(R.id.clock);
@@ -85,14 +77,14 @@ public class MainActivity extends WearableActivity
         buttonPlayer2 = (Button)findViewById(R.id.buttonPlayer2);
 
         if(savedInstanceState == null)
-            model = new DeuceModel();
+            model = new DeuceModel(this);
         else
         {
-            final int[] scores = savedInstanceState.getIntArray(KEY_SCORES);
+            final int[] scores = savedInstanceState.getIntArray(DeuceModel.KEY_SCORES);
             if(scores == null)
-                model = new DeuceModel();
+                model = new DeuceModel(this);
             else
-                model = new DeuceModel(scores[0], scores[1], scores[2], scores[3]);
+                model = new DeuceModel(this, scores[0], scores[1], scores[2], scores[3]);
         }
         DeuceListenerService.setModel(model);
 
@@ -117,29 +109,7 @@ public class MainActivity extends WearableActivity
     private void updateState()
     {
         updateView();
-
-        if(apiClient.isConnected())
-        {
-            Log.d("Deuce", "apiClient.isConnected() is true");
-            PutDataMapRequest requestMap =
-                    PutDataMapRequest.create(getString(R.string.path_update_score));
-            requestMap.getDataMap().putIntegerArrayList(KEY_SCORES, model.toIntegerArrayList());
-            PutDataRequest request = requestMap.asPutDataRequest();
-            Wearable.DataApi.putDataItem(apiClient, request)
-                    .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                        @Override public void onResult(@NonNull DataApi.DataItemResult dataItemResult)
-                        {
-                            if (!dataItemResult.getStatus().isSuccess())
-                            {
-                                Log.d("Deuce", "data sync failed");
-                            }
-                            else
-                            {
-                                Log.d("Deuce", "data sync succeeded");
-                            }
-                        }
-                    });
-        }
+        model.updateState();
     }
 
     @SuppressLint("SetTextI18n")
@@ -154,7 +124,7 @@ public class MainActivity extends WearableActivity
     {
         int[] scores = { model.getScorePlayer1(), model.getScorePlayer2(), model.getScorePlayer3(),
                 model.getScorePlayer4() };
-        outState.putIntArray(KEY_SCORES, scores);
+        outState.putIntArray(DeuceModel.KEY_SCORES, scores);
 
         super.onSaveInstanceState(outState);
     }
