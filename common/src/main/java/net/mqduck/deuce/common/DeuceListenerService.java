@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class DeuceListenerService extends WearableListenerService
 {
     public static final String TAG_BROADCAST = "deuce_broadcast";
-    private static final String DATA_PATH = "/score";
+    private static final String DATA_PATH = "/deuce/update_score";
     private static final String KEY_SCORES = "player_scores";
 
     private static DeuceModel model = null;

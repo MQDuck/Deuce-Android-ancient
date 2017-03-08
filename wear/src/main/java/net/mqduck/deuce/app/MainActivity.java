@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -41,6 +42,8 @@ import com.google.android.gms.wearable.Wearable;
 
 import net.mqduck.deuce.common.DeuceListenerService;
 import net.mqduck.deuce.common.DeuceModel;
+
+import net.mqduck.deuce.app.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -117,7 +120,9 @@ public class MainActivity extends WearableActivity
 
         if(apiClient.isConnected())
         {
-            PutDataMapRequest requestMap = PutDataMapRequest.create(WEARABLE_PATH);
+            Log.d("Deuce", "apiClient.isConnected() is true");
+            PutDataMapRequest requestMap =
+                    PutDataMapRequest.create(getString(R.string.path_update_score));
             requestMap.getDataMap().putIntegerArrayList(KEY_SCORES, model.toIntegerArrayList());
             PutDataRequest request = requestMap.asPutDataRequest();
             Wearable.DataApi.putDataItem(apiClient, request)
@@ -126,9 +131,11 @@ public class MainActivity extends WearableActivity
                         {
                             if (!dataItemResult.getStatus().isSuccess())
                             {
+                                Log.d("Deuce", "data sync failed");
                             }
                             else
                             {
+                                Log.d("Deuce", "data sync succeeded");
                             }
                         }
                     });

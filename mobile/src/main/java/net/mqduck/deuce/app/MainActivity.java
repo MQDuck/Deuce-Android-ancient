@@ -40,7 +40,8 @@ import com.google.android.gms.wearable.Wearable;
 
 import net.mqduck.deuce.common.DeuceListenerService;
 import net.mqduck.deuce.common.DeuceModel;
-import net.mqduck.deuce.common.R;
+
+import net.mqduck.deuce.app.R;
 
 public class MainActivity extends Activity
 {
