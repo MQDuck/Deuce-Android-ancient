@@ -26,22 +26,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
-
 import net.mqduck.deuce.common.DeuceListenerService;
 import net.mqduck.deuce.common.DeuceModel;
-
-import net.mqduck.deuce.app.R;
 
 public class MainActivity extends Activity
 {
@@ -64,14 +53,14 @@ public class MainActivity extends Activity
         buttonPlayer1.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v)
             {
-                model.setScorePlayer1(model.getScorePlayer1() + 1);
+                model.setScorePlayer1(model.getScoreTeam1() + 1);
                 updateState();
             }
         });
         buttonPlayer2.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v)
             {
-                model.setScorePlayer2(model.getScorePlayer2() + 1);
+                model.setScorePlayer2(model.getScoreTeam2() + 1);
                 updateState();
             }
         });
@@ -88,8 +77,8 @@ public class MainActivity extends Activity
     @SuppressLint("SetTextI18n")
     protected void updateView()
     {
-        buttonPlayer1.setText(Integer.toString(model.getScorePlayer1()));
-        buttonPlayer2.setText(Integer.toString(model.getScorePlayer2()));
+        buttonPlayer1.setText(Integer.toString(model.getScoreTeam1()));
+        buttonPlayer2.setText(Integer.toString(model.getScoreTeam2()));
     }
 
     @Override
