@@ -76,16 +76,7 @@ public class MainActivity extends WearableActivity
         buttonPlayer1 = (Button)findViewById(R.id.buttonPlayer1);
         buttonPlayer2 = (Button)findViewById(R.id.buttonPlayer2);
 
-        if(savedInstanceState == null)
-            model = new DeuceModel(this);
-        else
-        {
-            final int[] scores = savedInstanceState.getIntArray(DeuceModel.KEY_SCORES);
-            if(scores == null)
-                model = new DeuceModel(this);
-            else
-                model = new DeuceModel(this, scores[0], scores[1], scores[2], scores[3]);
-        }
+        model = new DeuceModel(this, savedInstanceState);
         DeuceListenerService.setModel(model);
 
         buttonPlayer1.setOnClickListener(new View.OnClickListener() {

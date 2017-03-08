@@ -58,16 +58,7 @@ public class MainActivity extends Activity
         buttonPlayer1 = (Button)findViewById(R.id.buttonPlayer1);
         buttonPlayer2 = (Button)findViewById(R.id.buttonPlayer2);
 
-        if(savedInstanceState == null)
-            model = new DeuceModel(this);
-        else
-        {
-            final int[] scores = savedInstanceState.getIntArray(DeuceModel.KEY_SCORES);
-            if(scores == null)
-                model = new DeuceModel(this);
-            else
-                model = new DeuceModel(this, scores[0], scores[1], scores[2], scores[3]);
-        }
+        model = new DeuceModel(this, savedInstanceState);
         DeuceListenerService.setModel(model);
 
         buttonPlayer1.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +95,7 @@ public class MainActivity extends Activity
     @Override
     public void onSaveInstanceState(Bundle outState)
     {
-        outState.putIntArray(DeuceModel.KEY_SCORES, model.toIntArray());
+        model.save(outState);
         super.onSaveInstanceState(outState);
     }
 

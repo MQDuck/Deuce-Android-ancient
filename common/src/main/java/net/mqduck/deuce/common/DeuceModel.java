@@ -20,6 +20,7 @@
 package net.mqduck.deuce.common;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -47,7 +48,7 @@ public class DeuceModel
     private Context context = null;
     private GoogleApiClient apiClient = null;
 
-    public DeuceModel(final Context context, final int scorePlayer1, final int scorePlayer2,
+    /*public DeuceModel(final Context context, final int scorePlayer1, final int scorePlayer2,
                       final int scorePlayer3, final int scorePlayer4)
     {
         init(context, scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4);
@@ -76,6 +77,32 @@ public class DeuceModel
                 .addApi(Wearable.API)
                 .build();
         apiClient.connect();
+    }*/
+
+    public DeuceModel(final Context context, final Bundle savedInstanceState)
+    {
+        this.context = context;
+
+        if(savedInstanceState == null)
+            scorePlayer1 = scorePlayer2 = scorePlayer3 = scorePlayer4 = 0;
+        else
+        {
+            final int[] scores = savedInstanceState.getIntArray(KEY_SCORES);
+            if(scores == null)
+                scorePlayer1 = scorePlayer2 = scorePlayer3 = scorePlayer4 = 0;
+            else
+            {
+                scorePlayer1 = scores[0];
+                scorePlayer2 = scores[1];
+                scorePlayer3 = scores[2];
+                scorePlayer4 = scores[3];
+            }
+        }
+    }
+
+    public void save(final Bundle outState)
+    {
+        outState.putIntArray(KEY_SCORES, toIntArray());
     }
 
     public void updateState()
