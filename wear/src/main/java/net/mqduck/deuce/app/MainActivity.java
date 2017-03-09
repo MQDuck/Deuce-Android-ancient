@@ -72,14 +72,14 @@ public class MainActivity extends WearableActivity
         buttonPlayer1.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v)
             {
-                model.setScorePlayer1(model.getScoreTeam1() + 1);
+                model.setPointsTeam1(model.getPointsTeam1() + 1);
                 updateState();
             }
         });
         buttonPlayer2.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v)
             {
-                model.setScorePlayer2(model.getScoreTeam2() + 1);
+                model.setPointsTeam2(model.getPointsTeam2() + 1);
                 updateState();
             }
         });
@@ -96,8 +96,8 @@ public class MainActivity extends WearableActivity
     @SuppressLint("SetTextI18n")
     private void updateView()
     {
-        buttonPlayer1.setText(Integer.toString(model.getScoreTeam1()));
-        buttonPlayer2.setText(Integer.toString(model.getScoreTeam2()));
+        buttonPlayer1.setText(model.getPointsStrTeam1());
+        buttonPlayer2.setText(model.getPointsStrTeam2());
     }
 
     @Override

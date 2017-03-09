@@ -78,7 +78,7 @@ public class DeuceListenerService extends WearableListenerService
                 if(scores != null)
                 {
                     Log.d("Deuce", "updating model");
-                    model.setScores(scores.get(0), scores.get(1));
+                    model.setPoints(scores.get(0), scores.get(1));
                 }
             }
         }

@@ -23,18 +23,16 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import net.mqduck.deuce.common.R;
+import java.util.HashMap;
 
 /**
  * Created by mqduck on 3/2/17.
@@ -43,66 +41,50 @@ import net.mqduck.deuce.common.R;
 public class DeuceModel
 {
     public static final String KEY_SCORES = "player_scores";
-
-    private int scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4;
+    public final SparseArray<String> scoreJargonMap;
+  private int pointsTeam1, pointsTeam2, scoreGameTeam1, scoreGameTeam2, scoreSetTeam1, scoreSetTeam2;
     private Context context = null;
     private GoogleApiClient apiClient = null;
-
-    /*public DeuceModel(final Context context, final int scorePlayer1, final int scorePlayer2,
-                      final int scorePlayer3, final int scorePlayer4)
-    {
-        init(context, scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4);
-    }
-
-    public DeuceModel(final Context context, final int scorePlayer1, final int scorePlayer2)
-    {
-        init(context, scorePlayer1, scorePlayer2, 0, 0);
-    }
-
-    public DeuceModel(final Context context)
-    {
-        init(context, 0, 0, 0, 0);
-    }
-
-    private void init(final Context context, final int scorePlayer1, final int scorePlayer2,
-                      final int scorePlayer3, final int scorePlayer4)
-    {
-        this.scorePlayer1 = scorePlayer1;
-        this.scorePlayer2 = scorePlayer2;
-        this.scorePlayer3 = scorePlayer3;
-        this.scorePlayer4 = scorePlayer4;
-        this.context = context;
-
-        apiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
-        apiClient.connect();
-    }*/
 
     public DeuceModel(final Context context, final Bundle savedInstanceState)
     {
         this.context = context;
 
         if(savedInstanceState == null)
-            scorePlayer1 = scorePlayer2 = scorePlayer3 = scorePlayer4 = 0;
+            pointsTeam1 = pointsTeam2 = scoreGameTeam1 = scoreGameTeam2 = scoreSetTeam1 = scoreSetTeam2 = 0;
         else
         {
             final int[] scores = savedInstanceState.getIntArray(KEY_SCORES);
             if(scores == null)
-                scorePlayer1 = scorePlayer2 = scorePlayer3 = scorePlayer4 = 0;
+                pointsTeam1 = pointsTeam2 = scoreGameTeam1 = scoreGameTeam2 = scoreSetTeam1 = scoreSetTeam2 = 0;
             else
             {
-                scorePlayer1 = scores[0];
-                scorePlayer2 = scores[1];
-                scorePlayer3 = scores[2];
-                scorePlayer4 = scores[3];
+                pointsTeam1 = scores[0];
+                pointsTeam2 = scores[1];
+                scoreGameTeam1 = scores[2];
+                scoreGameTeam2 = scores[3];
+                scoreSetTeam1 = scores[4];
+                scoreSetTeam2 = scores[5];
             }
         }
+
+        apiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .build();
+        apiClient.connect();
+
+        scoreJargonMap = new SparseArray<>();
+        scoreJargonMap.put(0, context.getString(R.string.score0));
+        scoreJargonMap.put(1, context.getString(R.string.score1));
+        scoreJargonMap.put(2, context.getString(R.string.score2));
+        scoreJargonMap.put(3, context.getString(R.string.score3));
+        scoreJargonMap.put(4, context.getString(R.string.score4));
     }
 
     public void save(final Bundle outState)
     {
-        outState.putIntArray(KEY_SCORES, toIntArray());
+        outState.putIntArray(KEY_SCORES, new int[]{ pointsTeam1, pointsTeam2, scoreGameTeam1, scoreGameTeam2,
+                scoreSetTeam1, scoreSetTeam2 });
     }
 
     public void updateState()
@@ -113,9 +95,11 @@ public class DeuceModel
             Log.d("Deuce", "apiClient.isConnected() is true");
             PutDataMapRequest requestMap =
                     PutDataMapRequest.create("/deuce/update_score");
-            requestMap.getDataMap().putIntegerArrayList(KEY_SCORES, toIntegerArrayList());
-            PutDataRequest request = requestMap.asPutDataRequest();
-            Wearable.DataApi.putDataItem(apiClient, request)
+            ArrayList<Integer> scores = new ArrayList<>();
+            scores.add(pointsTeam1);
+            scores.add(pointsTeam2);
+            requestMap.getDataMap().putIntegerArrayList(KEY_SCORES, scores);
+            Wearable.DataApi.putDataItem(apiClient, requestMap.asPutDataRequest())
                     .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
                         @Override public void onResult(@NonNull DataApi.DataItemResult dataItemResult)
                         {
@@ -132,51 +116,88 @@ public class DeuceModel
         }
     }
 
-    public int[] toIntArray()
+    public boolean setPoints(final int pointsTeam1, final int pointsTeam2)
     {
-        return new int[]{ scorePlayer1, scorePlayer2, scorePlayer3, scorePlayer4 };
+        if(pointsTeam1 < 0 || pointsTeam2 < 0)
+            return false;
+        this.pointsTeam1 = pointsTeam1;
+        this.pointsTeam2 = pointsTeam2;
+        return true;
     }
 
-    public ArrayList<Integer> toIntegerArrayList()
+    public boolean setPointsTeam1(final int points)
     {
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(scorePlayer1);
-        list.add(scorePlayer2);
-        list.add(scorePlayer3);
-        list.add(scorePlayer4);
-        return list;
+        if(points < 0)
+            return false;
+        pointsTeam1 = points;
+        return true;
     }
 
-    public boolean setScorePlayer1(final int score)
+    public int getPointsTeam1() { return pointsTeam1; }
+
+    public String getPointsStrTeam1()
+    {
+        String str = scoreJargonMap.get(pointsTeam1);
+        if(str == null)
+            return Integer.toString(pointsTeam1);
+        return str;
+    }
+
+    public String getPointsStrTeam2()
+    {
+        String str = scoreJargonMap.get(pointsTeam2);
+        if(str == null)
+            return Integer.toString(pointsTeam2);
+        return str;
+    }
+
+    public boolean setPointsTeam2(final int points)
+    {
+        if(points < 0)
+            return false;
+        pointsTeam2 = points;
+        return true;
+    }
+
+    public int getPointsTeam2() { return pointsTeam2; }
+
+    public boolean setScoreGameTeam1(final int score)
     {
         if(score < 0)
             return false;
-        scorePlayer1 = score;
+        scoreGameTeam1 = score;
         return true;
     }
-    public int getScorePlayer1() { return scorePlayer1; }
-    public boolean setScorePlayer2(final int score)
+
+    public int getScoreGameTeam1() { return scoreGameTeam1; }
+
+    public boolean setScoreGameTeam2(final int score)
     {
         if(score < 0)
             return false;
-        scorePlayer2 = score;
+        scoreGameTeam2 = score;
         return true;
     }
-    public int getScorePlayer2() { return scorePlayer2; }
-    public boolean setScorePlayer3(final int score)
+
+    public int getScoreGameTeam2() { return scoreGameTeam2; }
+
+    public boolean setScoreSetTeam1(final int score)
     {
         if(score < 0)
             return false;
-        scorePlayer3 = score;
+        scoreSetTeam1 = score;
         return true;
     }
-    public int getScorePlayer3() { return scorePlayer3; }
-    public boolean setScorePlayer4(final int score)
+
+    public int getScoreSetTeam1() { return scoreSetTeam1; }
+
+    public boolean setScoreSetTeam2(final int score)
     {
         if(score < 0)
             return false;
-        scorePlayer4 = score;
+        scoreSetTeam2 = score;
         return true;
     }
-    public int getScorePlayer4() { return scorePlayer4; }
+
+    public int getScoreSetTeam() { return scoreSetTeam2; }
 }

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Common</string>
+    <string name="score0">0</string>
+    <string name="score1">15</string>
+    <string name="score2">30</string>
+    <string name="score3">40</string>
+    <string name="score4">Game</string>
+    <string name="deuce">Deuce</string>
+    <string name="advantage">Advantage</string>
 </resources>
